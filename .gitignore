@@ -1,0 +1,7 @@
+# Directories
+cmake-build-debug/
+.idea/
+
+
+# Test files
+*.db
