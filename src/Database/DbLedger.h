@@ -20,6 +20,10 @@ const auto SQL_DROP_LEDGER_TABLE = QString(R"(
 DROP TABLE %1
 )");
 
+const auto SQL_DROP_LEDGER_REFERENCE = QString(R"(
+DELETE FROM ledgers WHERE name=?
+)");
+
 const auto SQL_CREATE_CONTENTS_TABLE = QString(R"(
 CREATE TABLE ledgers(name varchar primary key,
                      description blob)

@@ -25,7 +25,14 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Ledger:</string>
+        <string>Are you sure? Type the ledger name to delete:  </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="ledgerToDelete">
+       <property name="text">
+        <string>filler</string>
        </property>
       </widget>
      </item>
@@ -41,16 +48,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="QComboBox" name="tablesCombo">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>

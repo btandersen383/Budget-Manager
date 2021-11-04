@@ -17,15 +17,15 @@ LedgerLayout::LedgerLayout(QWidget *parent) : QWidget(parent) {
         return;
     }
     tablesModel->sort(tablesModel->fieldIndex("name"), Qt::AscendingOrder);
-    ui.tablesCombo->setModel(tablesModel);
-    ui.tablesCombo->setModelColumn(tablesModel->fieldIndex("name"));
+    ui.ledgerListWidget->setModel(tablesModel);
+    ui.ledgerListWidget->setModelColumn(tablesModel->fieldIndex("name"));
 
     // Create the data ledgerModel
     // Uses default connection to Database, Database must be opened
     ledgerModel = new QSqlRelationalTableModel(ui.transactionsTable);
     ledgerModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
 
-    changeTable(ui.tablesCombo->currentText());
+    changeTable(ui.ledgerListWidget->currentIndex().data().toString());
 
     connectAll();
 }
@@ -58,15 +58,15 @@ void LedgerLayout::connectAll() {
 
     // Connect the table combo to change the viewed table
     // QOverload is used when there are multiple functions with the same name but different params
-    connect(ui.tablesCombo, &QComboBox::currentTextChanged,
-            this, &LedgerLayout::changeTable);
+    connect(ui.ledgerListWidget, &QListView::clicked,
+            this, &LedgerLayout::ledgerListSelection);
 }
 
 void LedgerLayout::enableButtons(bool enable) {
     ui.revertButton->setEnabled(enable);
     ui.saveButton->setEnabled(enable);
     // Disable the table changer when changes are not saved
-    ui.tablesCombo->setDisabled(enable);
+    ui.ledgerListWidget->setDisabled(enable);
 }
 
 void LedgerLayout::addTransaction() {
@@ -141,6 +141,10 @@ void LedgerLayout::showFilterDialog() {
     delete fld;
 }
 
+void LedgerLayout::ledgerListSelection(const QModelIndex &index) {
+    changeTable(index.data().toString());
+}
+
 void LedgerLayout::changeTable(const QString &name) {
     if (name.length() == 0) {
         return;
@@ -191,6 +195,9 @@ void LedgerLayout::changeTable(const QString &name) {
     // Keep the Description column the largest
     ui.transactionsTable->horizontalHeader()->setSectionResizeMode(
             ledgerModel->fieldIndex("description"), QHeaderView::Stretch);
+
+    // Set the title label
+    ui.activeLedgerLabel->setText(name);
 }
 
 int strToCents(QString &str) {
@@ -244,10 +251,10 @@ void LedgerLayout::importCSV() {
             rec.setValue("amount", 0);
         }
 
-        std::cout << "Date: " << rec.value("dateof").toString().toStdString()
-        << "  Category: " << rec.value("category").toString().toStdString()
-        << "  Description: " << rec.value("description").toString().toStdString()
-        << "  Amount: " << rec.value("amount").toString().toStdString() << std::endl;
+//        std::cout << "Date: " << rec.value("dateof").toString().toStdString()
+//        << "  Category: " << rec.value("category").toString().toStdString()
+//        << "  Description: " << rec.value("description").toString().toStdString()
+//        << "  Amount: " << rec.value("amount").toString().toStdString() << std::endl;
 
         ledgerModel->insertRecord(0, rec);
         ui.transactionsTable->selectRow(0);
@@ -267,12 +274,17 @@ void LedgerLayout::addLedger() {
     if (addLedgerDialog->result() == QDialog::Accepted) {
         DbLedger::addLedger(addLedgerDialog->getLedgerName(), addLedgerDialog->getLedgerDesc());
         tablesModel->select();
-        // Do not remove, the combox box will be empty after select() for some reason
-        ui.tablesCombo->setCurrentText(addLedgerDialog->getLedgerName());
     }
     delete addLedgerDialog;
 }
 
 void LedgerLayout::deleteLedger() {
-
+    deleteLedgerDialog = new DeleteLedgerDialog(this);
+    deleteLedgerDialog->setToDelete(ui.ledgerListWidget->currentIndex().data().toString());
+    deleteLedgerDialog->exec();
+    if (deleteLedgerDialog->result() == QDialog::Accepted) {
+        DbLedger::dropLedger(deleteLedgerDialog->getLedgerName());
+        tablesModel->select();
+    }
+    delete deleteLedgerDialog;
 }

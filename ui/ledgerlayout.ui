@@ -6,16 +6,84 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>532</width>
-    <height>783</height>
+    <width>826</width>
+    <height>379</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Transactions</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QGroupBox" name="groupBox">
+  <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <item>
+    <layout class="QVBoxLayout" name="ledgerList">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetMaximumSize</enum>
+     </property>
+     <item>
+      <widget class="QListView" name="ledgerListWidget">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>150</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="selectionRectVisible">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="addLedgerButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Add Ledger</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="deleteLedger">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Delete Ledger</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="ledgerLayout">
      <property name="maximumSize">
       <size>
        <width>5000</width>
@@ -53,16 +121,9 @@
          <item>
           <layout class="QHBoxLayout" name="ledgerManagement">
            <item>
-            <widget class="QPushButton" name="addLedgerButton">
+            <widget class="QLabel" name="activeLedgerLabel">
              <property name="text">
-              <string>Add Ledger</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="deleteLedger">
-             <property name="text">
-              <string>Delete Ledger</string>
+              <string>Ledger</string>
              </property>
             </widget>
            </item>
@@ -86,29 +147,6 @@
            <property name="sizeConstraint">
             <enum>QLayout::SetMaximumSize</enum>
            </property>
-           <item>
-            <widget class="QLabel" name="tablesLabel">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Ledgers:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="tablesCombo">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
            <item>
             <widget class="QPushButton" name="filterButton">
              <property name="text">

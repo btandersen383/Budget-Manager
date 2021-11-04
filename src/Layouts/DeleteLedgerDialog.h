@@ -9,7 +9,7 @@
 class DeleteLedgerDialog: public QDialog {
 public:
     explicit DeleteLedgerDialog(QWidget *parent);
-
+    void setToDelete(const QString &name);
     QString getLedgerName();
 
 private:

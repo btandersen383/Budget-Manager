@@ -8,6 +8,7 @@
 #include "ui_ledgerlayout.h"
 #include "src/Layouts/FilterLedgerDialog.h"
 #include "AddLedgerDialog.h"
+#include "DeleteLedgerDialog.h"
 
 class LedgerLayout: public QWidget {
 Q_OBJECT
@@ -26,6 +27,7 @@ private slots:
     void importCSV();
     void deleteRow();
     void changeTable(const QString &name);
+    void ledgerListSelection(const QModelIndex &index);
     void showFilterDialog();
 
 private:
@@ -43,6 +45,7 @@ private:
     Ui::TransactionsWidget ui{};
     FilterLedgerDialog *fld;
     AddLedgerDialog *addLedgerDialog;
+    DeleteLedgerDialog *deleteLedgerDialog;
     QSqlTableModel *tablesModel;
     QSqlRelationalTableModel *ledgerModel;
 };

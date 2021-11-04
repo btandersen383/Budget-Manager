@@ -36,7 +36,6 @@ void DbLedger::addTransactions(QSqlQuery &q, const QDate &dateof, const QString 
 int DbLedger::getTotalByCategory(const QString &tableName, const QString &cat) {
     auto q = QSqlQuery();
     if (!q.prepare(SQL_SUM_SINGLE_CATEGORY.arg(tableName))) {
-        std::cout << "failed to prepare" << std::endl;
         return 0;
     }
     q.addBindValue(cat);
@@ -47,9 +46,6 @@ int DbLedger::getTotalByCategory(const QString &tableName, const QString &cat) {
         else {
             return 0;
         }
-    }
-    else {
-        std::cout << "failed to exec" << std::endl;
     }
     return 0;
 }
@@ -64,6 +60,12 @@ QSqlError DbLedger::dropLedger(const QString &name) {
     }
     q.exec();
 
+    if (!q.prepare(SQL_DROP_LEDGER_REFERENCE)) {
+        return q.lastError();
+    }
+    q.addBindValue(name);
+    q.exec();
+
     return q.lastError();
 }
 
@@ -72,19 +74,15 @@ QMap<QString, int> DbLedger::getTotals(const QString &tableName) {
     auto q = QSqlQuery();
 
     if (!q.prepare(SQL_SUM_ALL_CATEGORY.arg(tableName))) {
-        std::cout << "failed to prepare" << std::endl;
         return {};
     }
 
     if (q.exec()) {
-        std::cout << "Number of results " << q.size() << std::endl;
         while (q.next()) {
-            std::cout << q.value(0).toString().toStdString() << " " << q.value(1).toString().toStdString() << std::endl;
             map.insert(q.value(0).toString(), q.value(1).toInt());
         }
     }
     else {
-        std::cout << "failed to exec" << std::endl;
         return {};
     }
     return map;

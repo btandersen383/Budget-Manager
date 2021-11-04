@@ -1,17 +1,20 @@
 
 #include "DeleteLedgerDialog.h"
 
-DeleteLedgerDialog::DeleteLedgerDialog(QWidget *parent)
-: QDialog(parent), ui(new Ui::DeleteLedger) {
+DeleteLedgerDialog::DeleteLedgerDialog(QWidget *parent): QDialog(parent), ui(new Ui::DeleteLedger) {
     ui->setupUi(this);
-
-    // TODO: set up combo box
 }
 
 QString DeleteLedgerDialog::getLedgerName() {
-    if (ui->tablesCombo->currentText() == ui->confirmationLine->text()) {
-        return ui->tablesCombo->currentText();
+    if (ui->ledgerToDelete->text() == ui->confirmationLine->text()) {
+        return ui->ledgerToDelete->text();
     }
     else
+    {
         return {};
+    }
+}
+
+void DeleteLedgerDialog::setToDelete(const QString &name) {
+    ui->ledgerToDelete->setText(name);
 }

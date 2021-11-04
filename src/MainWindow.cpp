@@ -13,7 +13,7 @@ MainWindow::MainWindow() : ui(new Ui::MainWindow) {
     }
 
     // Initialize the database
-    QSqlError err = DbManagement::initdb("testing");
+    QSqlError err = DbManagement::initdb("testing.db");
     if (err.type() != QSqlError::NoError) {
         showError(err);
         return;
