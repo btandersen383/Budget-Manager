@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>645</width>
+    <width>915</width>
     <height>746</height>
    </rect>
   </property>
@@ -41,7 +41,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>645</width>
+     <width>915</width>
      <height>22</height>
     </rect>
    </property>
@@ -49,6 +49,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionNew_Database"/>
     <addaction name="actionLoad"/>
     <addaction name="actionSave"/>
     <addaction name="actionExport"/>
@@ -163,6 +164,11 @@
   <action name="actionDelete_Ledger">
    <property name="text">
     <string>Delete Ledger</string>
+   </property>
+  </action>
+  <action name="actionNew_Database">
+   <property name="text">
+    <string>New</string>
    </property>
   </action>
  </widget>

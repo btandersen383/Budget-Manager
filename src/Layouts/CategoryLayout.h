@@ -13,6 +13,9 @@ Q_OBJECT
 public:
     explicit CategoryLayout(QWidget *parent = nullptr);
 
+public slots:
+    void refreshModels();
+
 signals:
     void changedCategory();
 

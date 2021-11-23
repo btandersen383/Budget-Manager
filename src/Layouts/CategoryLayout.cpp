@@ -17,7 +17,7 @@ CategoryLayout::CategoryLayout(QWidget *parent): QWidget(parent) {
     model->setHeaderData(model->fieldIndex("category"),
                          Qt::Horizontal, tr("Category"));
 
-    // Set the ledgerModel and hide the ID column
+    // Set the m_ledgerModel and hide the ID column
     ui.tableView->setModel(model);
     ui.tableView->setColumnHidden(model->fieldIndex("id"), true);
     ui.tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -70,4 +70,8 @@ void CategoryLayout::addCat() {
     model->insertRecord(0, rec);
     ui.tableView->selectRow(0);
     ui.categoryEdit->setFocus();
+}
+
+void CategoryLayout::refreshModels() {
+
 }

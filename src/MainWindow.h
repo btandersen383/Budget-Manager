@@ -14,15 +14,20 @@ class MainWindow : public QMainWindow {
 public:
     MainWindow();
 
+    signals:
+    void databaseChanged();
+
 private slots:
     void about();
     void ledgerView();
     void categoryView();
+    void loadDB();
 
 private:
-    Ui::MainWindow *ui;
-    LedgerLayout *tw;
-    CategoryLayout *cw;
+    Ui::MainWindow *m_ui;
+    LedgerLayout *m_ledgerLayout;
+    CategoryLayout *m_categoryLayout;
+    QString m_database = "testing.db";
 
     void connectMenuBar();
     void showError(const QSqlError &err);

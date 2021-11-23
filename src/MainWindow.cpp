@@ -1,11 +1,12 @@
-
+#include <iostream>
+#include <src/Layouts/SummaryWidget.h>
 #include "MainWindow.h"
 #include "src/Database/DbManagement.h"
-#include "src/Layouts/AnalysisWidget.h"
+#include "src/Layouts/ChartsAnalysisLayout.h"
 #include "src/Database/DbCategory.h"
 
-MainWindow::MainWindow() : ui(new Ui::MainWindow) {
-    ui->setupUi(this);
+MainWindow::MainWindow() : m_ui(new Ui::MainWindow) {
+    m_ui->setupUi(this);
 
     if (!QSqlDatabase::drivers().contains("QSQLITE")) {
         QMessageBox::critical(this, "Unable to load database",
@@ -13,41 +14,40 @@ MainWindow::MainWindow() : ui(new Ui::MainWindow) {
     }
 
     // Initialize the database
-    QSqlError err = DbManagement::initdb("testing.db");
+    QSqlError err = DbManagement::initdb(m_database);
     if (err.type() != QSqlError::NoError) {
         showError(err);
         return;
     }
 
-    tw = new LedgerLayout(this);
-    setCentralWidget(tw);
+    m_ledgerLayout = new LedgerLayout(this);
+    connect(this, &MainWindow::databaseChanged, m_ledgerLayout, &LedgerLayout::refreshModels);
+    setCentralWidget(m_ledgerLayout);
 
-    cw = new CategoryLayout(this);
-    cw->hide();
+    m_categoryLayout = new CategoryLayout(this);
+    m_categoryLayout->hide();
     connectMenuBar();
 }
 
 void MainWindow::connectMenuBar() {
     // File
-    connect(ui->actionExit, &QAction::triggered, this, &MainWindow::close);
+    connect(m_ui->actionLoad, &QAction::triggered, this, &MainWindow::loadDB);
+    connect(m_ui->actionExit, &QAction::triggered, this, &MainWindow::close);
 
     // View
-    connect(ui->actionLedgers, &QAction::triggered, this, &MainWindow::ledgerView);
-    connect(ui->actionCategories, &QAction::triggered, this, &MainWindow::categoryView);
+    connect(m_ui->actionLedgers, &QAction::triggered, this, &MainWindow::ledgerView);
+    connect(m_ui->actionCategories, &QAction::triggered, this, &MainWindow::categoryView);
 
     // Analyze
-    connect(ui->actionCharts, &QAction::triggered, this, &MainWindow::showCharts);
-    connect(ui->actionSummary, &QAction::triggered, this, &MainWindow::showSummary);
+    connect(m_ui->actionCharts, &QAction::triggered, this, &MainWindow::showCharts);
+    connect(m_ui->actionSummary, &QAction::triggered, this, &MainWindow::showSummary);
 
     // Help
-    connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
+    connect(m_ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
 }
 
-#include <iostream>
-#include <src/Layouts/SummaryWidget.h>
-
 void MainWindow::showCharts() {
-    auto *analysisWindow = new AnalysisWidget();
+    auto *analysisWindow = new ChartsAnalysisLayout();
     analysisWindow->show();
 }
 
@@ -69,19 +69,41 @@ void MainWindow::showError(const QSqlError &err) {
 }
 
 void MainWindow::ledgerView() {
-    if (centralWidget() != tw) {
+    if (centralWidget() != m_ledgerLayout) {
         centralWidget()->hide();
         centralWidget()->setParent(nullptr);
-        setCentralWidget(tw);
-        tw->show();
+        setCentralWidget(m_ledgerLayout);
+        m_ledgerLayout->show();
     }
 }
 
 void MainWindow::categoryView() {
-    if (centralWidget() != cw) {
+    if (centralWidget() != m_categoryLayout) {
         centralWidget()->hide();
         centralWidget()->setParent(nullptr);
-        setCentralWidget(cw);
-        cw->show();
+        setCentralWidget(m_categoryLayout);
+        m_categoryLayout->show();
     }
+}
+
+void MainWindow::loadDB() {
+    QString databaseFileName = QFileDialog::getOpenFileName(
+            this, tr("Open Budget Database"),
+            QDir::homePath(), tr("Database File (*.db)"));
+    qDebug() << "Attempting to open " << databaseFileName;
+
+    // Make sure the current connection closes
+    DbManagement::closedb(m_database);
+
+    // Set the new database name
+    m_database = databaseFileName;
+
+    // Initialize the database
+    QSqlError err = DbManagement::initdb(m_database);
+    if (err.type() != QSqlError::NoError) {
+        showError(err);
+        return;
+    }
+
+    emit databaseChanged();
 }

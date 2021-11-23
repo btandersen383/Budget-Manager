@@ -17,6 +17,9 @@ public:
     explicit LedgerLayout(QWidget *parent = nullptr);
     ~LedgerLayout() override;
 
+public slots:
+    void refreshModels();
+
 private slots:
     void addTransaction();
     void addLedger();
@@ -42,12 +45,12 @@ private:
         credit = 4
         };
 
-    Ui::TransactionsWidget ui{};
-    FilterLedgerDialog *fld;
-    AddLedgerDialog *addLedgerDialog;
-    DeleteLedgerDialog *deleteLedgerDialog;
-    QSqlTableModel *tablesModel;
-    QSqlRelationalTableModel *ledgerModel;
+    Ui::TransactionsWidget *m_ui = nullptr;
+    FilterLedgerDialog *m_filterDialog = nullptr;
+    AddLedgerDialog *m_addLedgerDialog = nullptr;
+    DeleteLedgerDialog *m_deleteLedgerDialog = nullptr;
+    QSqlTableModel *m_tablesModel = nullptr;
+    QSqlRelationalTableModel *m_ledgerModel = nullptr;
 };
 
 #endif

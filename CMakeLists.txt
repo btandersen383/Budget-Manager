@@ -29,7 +29,7 @@ set (SOURCES main.cpp src/MainWindow.cpp
         src/Layouts/CategoryLayout.cpp
         src/Layouts/LedgerLayout.cpp
         src/Layouts/FilterLedgerDialog.cpp
-        src/Layouts/AnalysisWidget.cpp
+        src/Layouts/ChartsAnalysisLayout.cpp
         src/Layouts/AddLedgerDialog.cpp
         src/Layouts/DeleteLedgerDialog.cpp
         src/Layouts/SummaryWidget.cpp
@@ -44,7 +44,7 @@ set(HEADERS src/MainWindow.h
         src/Layouts/LedgerLayout.h
         src/Layouts/CategoryLayout.h
         src/Layouts/FilterLedgerDialog.h
-        src/Layouts/AnalysisWidget.h
+        src/Layouts/ChartsAnalysisLayout.h
         src/Layouts/AddLedgerDialog.h
         src/Layouts/DeleteLedgerDialog.h
         src/Layouts/SummaryWidget.h

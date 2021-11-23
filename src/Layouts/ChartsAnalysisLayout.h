@@ -9,9 +9,9 @@
 
 #include "ui_analysislayout.h"
 
-class AnalysisWidget: public QWidget {
+class ChartsAnalysisLayout: public QWidget {
 public:
-    explicit AnalysisWidget(QWidget *parent = nullptr);
+    explicit ChartsAnalysisLayout(QWidget *parent = nullptr);
 
 private:
     Ui::AnalysisView *ui;

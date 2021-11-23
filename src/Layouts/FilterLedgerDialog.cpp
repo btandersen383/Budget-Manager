@@ -31,9 +31,9 @@ FilterLedgerDialog::FilterLedgerDialog(QWidget *parent): QDialog(parent) {
 //        showError(model->lastError());
         return;
     }
-    // Get the relation ledgerModel, ie the table setRelation connects a column to
+    // Get the relation m_ledgerModel, ie the table setRelation connects a column to
     ui.categoryEdit->setModel(model);
-    // Set the column in the ledgerModel (categories table) to use for values
+    // Set the column in the m_ledgerModel (categories table) to use for values
     ui.categoryEdit->setModelColumn(model->fieldIndex("category"));
     ui.categoryEdit->setEditable(false);
 

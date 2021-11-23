@@ -1,77 +1,75 @@
 
+#include <QSqlQuery>
+#include <utility>
 #include "SqlQueryModelFactory.h"
 
-QString centsToString(int cents) {
-    // Use abs since its easier to calculate comma
-    QString dollars = QString::number(abs(cents));
-    dollars = dollars.insert(dollars.size()-2, ".");
-    // If I need more than one comma, I'm probably not doing my own budget keeping...
-    if (dollars.size() > 6) {
-        dollars = dollars.insert(dollars.size()-6, ",");
-    }
-    dollars.prepend("$");
-    if (cents < 0) {
-        dollars.prepend("-");
-    }
-    return dollars;
-}
+namespace SqlQueryModelFactory {
 
-class SumCategory: public QSqlQueryModel {
+    QString centsToString(int cents) {
+        // Use abs since its easier to calculate comma
+        QString dollars = QString::number(abs(cents));
+        dollars = dollars.insert(dollars.size()-2, ".");
+        // If I need more than one comma, I'm probably not doing my own budget keeping...
+        if (dollars.size() > 6) {
+            dollars = dollars.insert(dollars.size()-6, ",");
+        }
+        dollars.prepend("$");
+        if (cents < 0) {
+            dollars.prepend("-");
+        }
+        return dollars;
+    }
 
-    // This will sum grouped by category only
-    // This will sum a single category
+    QVariant CustomSqlQueryModel::data(const QModelIndex &item) const {
+        QVariant value = QSqlQueryModel::data(item);
+        if (m_display) {
+            // In display mode, make pretty
+            if (item.column() == 1) {
+                return centsToString(value.toInt());
+            }
+        }
+        else {
+            // Not display mode, raw value
+            if (item.column() == 1) {
+                // May need to keep numbers all positive
+                return m_positive ? abs(value.toInt()) : value.toInt();
+            }
+        }
+        return value;
+    }
+
     constexpr static auto SQL_SUM_SINGLE_CATEGORY = R"(
         SELECT SUM(amount) FROM %1
         WHERE category=(SELECT id FROM categories
                         WHERE categories.category=?)
     )";
 
-public:
-    SumCategory(const QString &tableName, const QString &category, QObject *parent = nullptr) : QSqlQueryModel(parent) {
-        setQuery(QString(SQL_SUM_SINGLE_CATEGORY).arg(tableName, category));
-        QSqlQueryModel::setHeaderData(1, Qt::Horizontal, tr("Sum"));
-    }
-
-    QVariant data(const QModelIndex &item, int role = Qt::DisplayRole) const override {
-        QVariant value = QSqlQueryModel::data(item, role);
-        if (value.isValid() && role == Qt::DisplayRole) {
-            if (item.column() == 1)
-                return centsToString(value.toInt());
-        }
-        return value;
-    }
-};
-
-class SumAllCategory: public QSqlQueryModel {
-
-    // This will sum grouped by category only
     constexpr static auto SQL_SUM_ALL_CATEGORY = R"(
         SELECT categories.category, SUM(%1.amount)
         FROM %1
         INNER JOIN categories ON categories.id=%1.category
         GROUP BY %1.category
+        ORDER BY SUM(%1.amount)
     )";
 
-public:
-    explicit SumAllCategory(const QString &tableName, QObject *parent = nullptr) : QSqlQueryModel(parent) {
-        setQuery(QString(SQL_SUM_ALL_CATEGORY).arg(tableName));
-        QSqlQueryModel::setHeaderData(0, Qt::Horizontal, tr("Category"));
-        QSqlQueryModel::setHeaderData(1, Qt::Horizontal, tr("Sum"));
-    }
+    constexpr static auto SQL_SUM_ALL_CATEGORY_EXPENSE = R"(
+        SELECT categories.category, SUM(%1.amount)
+        FROM %1
+        INNER JOIN categories ON categories.id=%1.category
+        WHERE amount < 0
+        GROUP BY %1.category
+        ORDER BY SUM(%1.amount)
+    )";
 
-    QVariant data(const QModelIndex &item, int role = Qt::DisplayRole) const override {
-        QVariant value = QSqlQueryModel::data(item, role);
-        if (value.isValid() && role == Qt::DisplayRole) {
-            if (item.column() == 1)
-                return centsToString(value.toInt());
-        }
-        return value;
-    }
-};
+    constexpr static auto SQL_SUM_ALL_CATEGORY_INCOME = R"(
+        SELECT categories.category, SUM(%1.amount)
+        FROM %1
+        INNER JOIN categories ON categories.id=%1.category
+        WHERE amount > 0
+        GROUP BY %1.category
+        ORDER BY SUM(%1.amount)
+    )";
 
-class SumMonth: public QSqlQueryModel {
-
-    // This will sum a single month
     constexpr static auto SQL_SUM_SINGLE_MONTH = R"(
         SELECT SUM(%1.amount),
                case strftime('%m', %1.dateof)
@@ -92,16 +90,6 @@ class SumMonth: public QSqlQueryModel {
         WHERE strftime('%m', dateof)='03'
     )";
 
-public:
-    SumMonth(const QString &tableName, const QString &month, QObject *parent = nullptr) : QSqlQueryModel(parent) {
-        setQuery(QString(SQL_SUM_SINGLE_MONTH).arg(tableName, month));
-        QSqlQueryModel::setHeaderData(1, Qt::Horizontal, tr("Sum"));
-    }
-};
-
-class SumAllMonths: public QSqlQueryModel {
-
-    // This will sum all month
     constexpr static auto SQL_SUM_ALL_MONTHS = R"(
         SELECT case strftime('%m', %1.dateof)
                when '01' then 'January'
@@ -122,26 +110,6 @@ class SumAllMonths: public QSqlQueryModel {
         GROUP BY strftime('%m', dateof)
     )";
 
-public:
-    explicit SumAllMonths(const QString &tableName, QObject *parent = nullptr) : QSqlQueryModel(parent) {
-        setQuery(QString(SQL_SUM_ALL_MONTHS).arg(tableName));
-        QSqlQueryModel::setHeaderData(0, Qt::Horizontal, tr("Month"));
-        QSqlQueryModel::setHeaderData(1, Qt::Horizontal, tr("Sum"));
-    }
-
-    QVariant data(const QModelIndex &item, int role = Qt::DisplayRole) const override {
-        QVariant value = QSqlQueryModel::data(item, role);
-        if (value.isValid() && role == Qt::DisplayRole) {
-            if (item.column() == 1)
-                return centsToString(value.toInt());
-        }
-        return value;
-    }
-};
-
-class SumAllCategoryMonth: public QSqlQueryModel {
-
-    // This will sum all month
     constexpr static auto SQL_SUM_ALL_CATEGORY_MONTH = R"(
         SELECT case strftime('%m', %1.dateof)
                     when '01' then 'January'
@@ -163,36 +131,60 @@ class SumAllCategoryMonth: public QSqlQueryModel {
         GROUP BY %1.category, strftime('%m', dateof)
     )";
 
-public:
-    explicit SumAllCategoryMonth(const QString &tableName, QObject *parent = nullptr) : QSqlQueryModel(parent) {
-        setQuery(QString(SQL_SUM_ALL_CATEGORY_MONTH).arg(tableName));
-        QSqlQueryModel::setHeaderData(0, Qt::Horizontal, tr("Month"));
-        QSqlQueryModel::setHeaderData(1, Qt::Horizontal, tr("Category"));
-        QSqlQueryModel::setHeaderData(2, Qt::Horizontal, tr("Sum"));
-    }
-};
+    CustomSqlQueryModel* createModel(const SqlQueryModelFactory::QueryModel type,
+                                const QString &table, const QVariant &extra) {
+        auto* model = new CustomSqlQueryModel(table);
 
-
-QSqlQueryModel* SqlQueryModelFactory::createModel(SqlQueryModelFactory::QueryModel type,
-                            const QString &table, const QVariant &extra) {
-    switch (type) {
-        case SqlQueryModelFactory::SQL_SUM_SINGLE_CATEGORY:
-            // Expects a valid category in the extra variant
-            return new SumCategory(table, extra.toString());
-        case SqlQueryModelFactory::SQL_SUM_ALL_CATEGORY:
-            return new SumAllCategory(table);
-        case SqlQueryModelFactory::SQL_SUM_SINGLE_MONTH:
-            // Expects a valid month in the extra variant
-            return new SumMonth(table, extra.toString());
-        case SqlQueryModelFactory::SQL_SUM_ALL_MONTH:
-            return new SumAllMonths(table);
-        case SqlQueryModelFactory::SQL_SUM_CATEGORY_DATE_RANGE:
-            // This will require two variants...
-            break;
-        case SqlQueryModelFactory::SQL_SUM_CATEGORY_MONTH:
-            return new SumAllCategoryMonth(table);
-        default:
-            return new QSqlQueryModel;
+        switch (type) {
+            case SqlQueryModelFactory::SUM_SINGLE_CATEGORY:
+                if (!extra.isValid() || !extra.canConvert<QString>()) {
+                    // Must have a string given as additional argument
+                    model = nullptr;
+                    break;
+                }
+                model->setQuery(QString(SQL_SUM_SINGLE_CATEGORY).arg(table));
+                model->query().addBindValue(extra.toString());
+                model->setHeaderData(1, Qt::Horizontal, "Sum");
+                break;
+            case SqlQueryModelFactory::SUM_ALL_CATEGORIES:
+                model->setQuery(QString(SQL_SUM_ALL_CATEGORY).arg(table));
+                model->setHeaderData(0, Qt::Horizontal, "Category");
+                model->setHeaderData(1, Qt::Horizontal, "Sum");
+                break;
+            case SqlQueryModelFactory::SUM_ALL_CATEGORIES_EXPENSE:
+                model->setQuery(QString(SQL_SUM_ALL_CATEGORY_EXPENSE).arg(table));
+                model->setHeaderData(0, Qt::Horizontal, "Category");
+                model->setHeaderData(1, Qt::Horizontal, "Sum");
+                break;
+            case SqlQueryModelFactory::SUM_ALL_CATEGORIES_INCOME:
+                model->setQuery(QString(SQL_SUM_ALL_CATEGORY_INCOME).arg(table));
+                model->setHeaderData(0, Qt::Horizontal, "Category");
+                model->setHeaderData(1, Qt::Horizontal, "Sum");
+                break;
+            case SqlQueryModelFactory::SUM_SINGLE_MONTH:
+                if (!extra.isValid() || !extra.canConvert<QString>()) {
+                    // Must provide month as extra argument
+                    model = nullptr;
+                    break;
+                }
+                model->setQuery(QString(SQL_SUM_SINGLE_MONTH).arg(table));
+                model->query().addBindValue(extra.toString());
+                model->setHeaderData(1, Qt::Horizontal, "Sum");
+                break;
+            case SqlQueryModelFactory::SUM_ALL_MONTH:
+                model->setQuery(QString(SQL_SUM_ALL_MONTHS).arg(table));
+                model->setHeaderData(0, Qt::Horizontal, "Month");
+                model->setHeaderData(1, Qt::Horizontal, "Sum");
+                break;
+            case SqlQueryModelFactory::SUM_CATEGORY_MONTH:
+                model->setQuery(QString(SQL_SUM_ALL_CATEGORY_MONTH).arg(table));
+                model->setHeaderData(0, Qt::Horizontal, "Month");
+                model->setHeaderData(1, Qt::Horizontal, "Category");
+                model->setHeaderData(2, Qt::Horizontal, "Sum");
+                break;
+            default:
+                break;
+        }
+        return model;
     }
-    return new QSqlQueryModel;
 }

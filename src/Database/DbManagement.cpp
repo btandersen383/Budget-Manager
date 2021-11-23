@@ -7,15 +7,15 @@
 
 QSqlError DbManagement::initdb(const QString &name) {
     // Connect to the database and open
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName(name);
+    QSqlDatabase m_db = QSqlDatabase::addDatabase("QSQLITE");
+    m_db.setDatabaseName(name);
 
-    if (!db.open()) {
-        return db.lastError();
+    if (!m_db.open()) {
+        return m_db.lastError();
     }
 
     // Check to see if this database is already initialized
-    QStringList tables = db.tables();
+    QStringList tables = m_db.tables();
     if (tables.contains("ledgers", Qt::CaseInsensitive)
         && tables.contains("categories", Qt::CaseInsensitive))
         return QSqlError();
@@ -44,4 +44,11 @@ QSqlError DbManagement::initdb(const QString &name) {
     }
 
     return {};
+}
+
+void DbManagement::closedb(const QString &name) {
+    QSqlDatabase m_db = QSqlDatabase::database();
+    if (m_db.isOpen()) {
+        m_db.close();
+    }
 }

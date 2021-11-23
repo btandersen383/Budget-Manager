@@ -9,6 +9,7 @@
 class DbManagement {
 public:
     static QSqlError initdb(const QString &name);
+    static void closedb(const QString &name);
 };
 
 

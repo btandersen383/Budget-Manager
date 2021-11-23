@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>826</width>
-    <height>379</height>
+    <height>419</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,6 +19,20 @@
      <property name="sizeConstraint">
       <enum>QLayout::SetMaximumSize</enum>
      </property>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Ledger List</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QListView" name="ledgerListWidget">
        <property name="sizePolicy">
@@ -121,9 +135,16 @@
          <item>
           <layout class="QHBoxLayout" name="ledgerManagement">
            <item>
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Active Ledger:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QLabel" name="activeLedgerLabel">
              <property name="text">
-              <string>Ledger</string>
+              <string>None</string>
              </property>
             </widget>
            </item>
@@ -197,6 +218,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
         <property name="selectionBehavior">
          <enum>QAbstractItemView::SelectRows</enum>
         </property>
@@ -266,6 +290,18 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>filterButton</tabstop>
+  <tabstop>importButton</tabstop>
+  <tabstop>addButton</tabstop>
+  <tabstop>transactionsTable</tabstop>
+  <tabstop>deleteButton</tabstop>
+  <tabstop>revertButton</tabstop>
+  <tabstop>saveButton</tabstop>
+  <tabstop>ledgerListWidget</tabstop>
+  <tabstop>addLedgerButton</tabstop>
+  <tabstop>deleteLedger</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
